@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Süt Çiftliği Takip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #f3f7ee;
+    --bg2: #eef5e6;
+    --card: #ffffff;
+    --green: #4C9A4A;
+    --green-dark: #3d7d3b;
+    --cream: #FFF8E7;
+    --amber: #E8A33D;
+    --amber-dark: #c8862c;
+    --coral: #E06C5C;
+    --coral-dark: #c85647;
+    --pink: #D66FA0;
+    --pink-dark: #b8548a;
+    --slate: #3A3F35;
+    --slate-light: #838a7d;
+    --border: #E1E8D8;
+    --input-bg: #fbfdf8;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 32px 14px;
+    color: var(--slate);
+  }
+
+  @keyframes containerIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  .container {
+    background: var(--card);
+    padding: 24px 20px;
+    border-radius: 18px;
+    box-shadow: 0 10px 34px rgba(76, 154, 74, 0.15);
+    width: 100%;
+    max-width: 440px;
+    animation: containerIn 0.4s ease;
+  }
+
+  h1 {
+    text-align: center; font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: 19px; margin: 0 0 4px; color: var(--slate);
+  }
+  h1 span { color: var(--green-dark); }
+  .subtitle { text-align: center; font-size: 12px; color: var(--slate-light); margin-bottom: 16px; }
+
+  /* User name screen */
+  .name-input {
+    width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 12px;
+    font-size: 15px; background: var(--input-bg); color: var(--slate); outline: none; margin-bottom: 14px; text-align: center;
+  }
+  .name-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(76, 154, 74, 0.15); }
+
+  .user-bar {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 11.5px; color: var(--slate-light); margin-bottom: 6px;
+  }
+  .user-bar button { background: none; color: var(--green-dark); text-decoration: underline; font-size: 11px; padding: 2px; }
+
+  .sync-status { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; color: var(--slate-light); margin-bottom: 14px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .sync-dot.offline { background: var(--coral); }
+
+  .tabs { position: relative; display: flex; background: var(--bg1); border-radius: 12px; padding: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-indicator {
+    position: absolute; top: 4px; bottom: 4px; left: 4px; border-radius: 9px;
+    background: var(--green); transition: transform 0.3s cubic-bezier(.4,0,.2,1), width 0.3s; z-index: 0;
+  }
+  .tab-btn {
+    position: relative; z-index: 1; flex: 1; border: none; background: transparent;
+    padding: 9px 3px; font-size: 11px; font-weight: 600; color: var(--slate-light);
+    cursor: pointer; border-radius: 9px; transition: color 0.25s; white-space: nowrap;
+  }
+  .tab-btn.active { color: #fff; }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: containerIn 0.3s ease; }
+
+  .form-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  input[type="text"], input[type="date"], input[type="number"], input[type="password"], select {
+    padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'Inter', sans-serif; font-size: 13px; background: var(--input-bg);
+    color: var(--slate); outline: none; width: 100%;
+  }
+  input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(76, 154, 74, 0.15); }
+
+  button { font-family: 'Inter', sans-serif; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.1s, filter 0.15s; }
+  button:active { transform: scale(0.96); }
+
+  .btn-primary { background: var(--green); color: white; font-weight: 600; padding: 10px 16px; font-size: 13px; }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-secondary { background: var(--bg1); color: var(--slate); font-weight: 600; padding: 9px 12px; font-size: 12px; border: 1px solid var(--border); }
+  .btn-small { padding: 7px 10px; font-size: 11.5px; font-weight: 600; }
+
+  /* Cow list */
+  .cow-card { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: var(--cream); overflow: hidden; }
+  .cow-card-top { display: flex; align-items: center; justify-content: space-between; padding: 12px; cursor: pointer; }
+  .cow-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .cow-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .cow-name { font-weight: 600; font-size: 13.5px; }
+  .cow-tag { font-size: 11px; color: var(--slate-light); }
+  .cow-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+  .badge { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+  .badge-healthy { background: #e2f4e0; color: var(--green-dark); }
+  .badge-sick { background: #fde2df; color: var(--coral-dark); }
+  .badge-treatment { background: #fff1d6; color: var(--amber-dark); }
+  .badge-withdrawal { background: #fde2df; color: var(--coral-dark); }
+  .badge-pregnant { background: #fbe3ef; color: var(--pink-dark); }
+  .badge-vaccine-due { background: #fff1d6; color: var(--amber-dark); }
+  .badge-vaccine-overdue { background: #fde2df; color: var(--coral-dark); }
+  .badge-heat { background: #fbe3ef; color: var(--pink-dark); }
+  .badge-check { background: #e3ecfd; color: #3a5fc8; }
+
+  .attempt-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11.5px; }
+  .attempt-item:last-child { border-bottom: none; }
+  .attempt-item .a-date { color: var(--slate); flex-shrink: 0; }
+  .attempt-item select { flex: 1; font-size: 11px; padding: 5px 6px; }
+  .heat-date-chip { display: inline-block; background: #fbe3ef; color: var(--pink-dark); font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 20px; margin: 2px 3px 2px 0; }
+  .next-heat-info { font-size: 11.5px; color: var(--pink-dark); margin: 6px 0; font-weight: 600; }
+
+  .upcoming-panel {
+    border-radius: 14px; padding: 14px; margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff8ec, #fef2e2); border: 1px solid #ffdfa3;
+  }
+  .upcoming-panel.all-clear { background: #edf7ea; border-color: #cbe8c3; }
+  .upcoming-header { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: var(--slate); margin-bottom: 8px; }
+  .upcoming-item {
+    display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px;
+    background: white; margin-bottom: 6px; font-size: 12px;
+  }
+  .upcoming-item:last-child { margin-bottom: 0; }
+  .upcoming-item .u-bar { width: 4px; align-self: stretch; border-radius: 3px; flex-shrink: 0; }
+  .upcoming-item.urgent .u-bar { background: var(--coral); }
+  .upcoming-item.soon .u-bar { background: var(--amber); }
+  .upcoming-item .u-icon { font-size: 15px; flex-shrink: 0; }
+  .upcoming-item .u-text { flex: 1; color: var(--slate); }
+  .upcoming-item .u-days { font-weight: 700; font-size: 11px; flex-shrink: 0; }
+  .upcoming-item.urgent .u-days { color: var(--coral-dark); }
+  .upcoming-item.soon .u-days { color: var(--amber-dark); }
+  .empty-clear { font-size: 12px; color: var(--green-dark); text-align: center; padding: 4px; }
+  .cow-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .del-cow-btn { background: none; font-size: 14px; padding: 6px 8px; color: var(--coral); }
+  .del-cow-btn:hover { color: var(--coral-dark); }
+  .expand-btn {
+    background: var(--green); color: white; font-size: 13px; font-weight: 700;
+    padding: 7px 11px; border-radius: 8px; transition: transform 0.2s ease, background 0.15s;
+  }
+  .expand-btn:hover { background: var(--green-dark); }
+  .expand-btn.open { transform: rotate(180deg); }
+
+  .cow-detail { display: none; padding: 0 12px 14px; border-top: 1px dashed var(--border); }
+  .cow-detail.open { display: block; }
+  .detail-section { margin-top: 12px; padding: 10px; background: white; border-radius: 10px; border: 1px solid var(--border); }
+  .detail-section h4 { margin: 0 0 8px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--slate-light); }
+  .detail-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
+  .detail-row select, .detail-row input { font-size: 12px; padding: 7px 9px; }
+  .health-log-item { font-size: 11.5px; color: var(--slate); padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .health-log-item:last-child { border-bottom: none; }
+  .health-log-item .h-date { color: var(--slate-light); font-size: 10.5px; }
+  .warning-banner {
+    background: #fde2df; color: var(--coral-dark); font-size: 11px; font-weight: 600;
+    padding: 6px 10px; border-radius: 8px; margin-top: 6px;
+  }
+  .pregnant-banner {
+    background: #fbe3ef; color: var(--pink-dark); font-size: 11px; font-weight: 600;
+    padding: 6px 10px; border-radius: 8px; margin-top: 6px;
+  }
+
+  .empty-msg { text-align: center; color: var(--slate-light); font-size: 12.5px; padding: 20px 10px; }
+
+  /* Milk entry */
+  .date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .date-row input { flex: 1; }
+  .milk-row { padding: 10px; border-bottom: 1px solid var(--border); }
+  .milk-row:last-child { border-bottom: none; }
+  .milk-row-top { display: flex; align-items: center; gap: 8px; }
+  .milk-name { flex: 1; font-size: 13px; font-weight: 600; min-width: 0; word-break: break-word; }
+  .milk-input-group { display: flex; gap: 6px; flex-shrink: 0; }
+  .milk-input-wrap { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+  .milk-input-wrap label { font-size: 9px; color: var(--slate-light); font-weight: 700; text-transform: uppercase; }
+  .milk-input-wrap input { width: 54px; text-align: center; padding: 7px 4px; font-size: 12px; }
+
+  .day-summary {
+    background: var(--bg1); border-radius: 10px; padding: 10px 14px; margin-top: 12px;
+    display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--green-dark);
+  }
+
+  /* History */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .history-item:last-child { border-bottom: none; }
+  .history-date { font-weight: 600; color: var(--slate); }
+  .history-cow { color: var(--slate-light); font-size: 11px; }
+  .history-total { font-weight: 700; color: var(--green-dark); font-size: 13px; }
+
+  /* Stats */
+  .stats-summary { display: flex; gap: 8px; margin-bottom: 14px; }
+  .stat-box { flex: 1; background: var(--bg1); border-radius: 10px; padding: 10px; text-align: center; }
+  .stat-box .num { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--green-dark); }
+  .stat-box .lbl { font-size: 10px; color: var(--slate-light); margin-top: 2px; }
+  .chart-wrap { background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+  .chart-wrap h4 { margin: 0 0 10px; font-size: 12px; color: var(--slate); }
+  canvas { width: 100% !important; }
+
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(16px);
+    background: var(--slate); color: white; padding: 10px 18px; border-radius: 10px;
+    font-size: 13px; opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 1000; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 420px) {
+    body { padding: 18px 8px; }
+    .container { padding: 18px 14px; border-radius: 14px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- İsim ekranı -->
+  <div class="container" id="nameScreen">
+    <h1>🐄 Süt Çiftliği <span>Takip</span></h1>
+    <div class="subtitle">Kayıtlarda görünmesi için adını gir</div>
+    <input type="text" class="name-input" id="nameInput" placeholder="Adın (ör. Mehmet)">
+    <button class="btn-primary" style="width:100%;" onclick="saveUserName()">Devam Et</button>
+  </div>
+
+  <!-- Ana uygulama -->
+  <div class="container" id="appScreen" style="display:none;">
+    <h1>🐄 Süt Çiftliği <span>Takip</span></h1>
+    <div class="user-bar">👤 <span id="userNameDisplay"></span> · <button onclick="changeUserName()">değiştir</button></div>
+    <div class="sync-status"><span class="sync-dot" id="syncDot"></span><span id="syncText">Bağlanıyor...</span></div>
+
+    <div class="tabs" id="tabs">
+      <div class="tab-indicator" id="tabIndicator"></div>
+      <button class="tab-btn active" id="tabBtn-cows" onclick="switchTab('cows')">İnekler</button>
+      <button class="tab-btn" id="tabBtn-milk" onclick="switchTab('milk')">Süt Girişi</button>
+      <button class="tab-btn" id="tabBtn-history" onclick="switchTab('history')">Geçmiş</button>
+      <button class="tab-btn" id="tabBtn-stats" onclick="switchTab('stats')">İstatistik</button>
+      <button class="tab-btn" id="tabBtn-sales" onclick="switchTab('sales')">Satış</button>
+    </div>
+
+    <!-- İnekler -->
+    <div class="panel active" id="panel-cows">
+      <div id="upcomingPanel"></div>
+      <div class="form-row">
+        <input type="text" id="cowTagInput" placeholder="Küpe no (zorunlu)">
+        <input type="text" id="cowNameInput" placeholder="Takma ad (opsiyonel)">
+      </div>
+      <button class="btn-primary" style="width:100%; margin-bottom:16px;" onclick="addCow()">+ İnek Ekle</button>
+      <div id="cowList"></div>
+    </div>
+
+    <!-- Süt Girişi -->
+    <div class="panel" id="panel-milk">
+      <div class="date-row">
+        <input type="date" id="milkDate" onchange="renderMilkEntryList()">
+      </div>
+      <div id="milkEntryList"></div>
+      <div class="day-summary" id="daySummary" style="display:none;">
+        <span>Günlük Toplam</span>
+        <span id="daySummaryValue">0 L</span>
+      </div>
+      <button class="btn-primary" style="width:100%; margin-top:14px;" onclick="saveMilkEntries()">💾 Kaydı Kaydet</button>
+    </div>
+
+    <!-- Geçmiş -->
+    <div class="panel" id="panel-history">
+      <div class="filter-row">
+        <select id="historyCowFilter" onchange="renderHistory()">
+          <option value="all">Tüm İnekler</option>
+        </select>
+      </div>
+      <div id="historyList"></div>
+    </div>
+
+    <!-- İstatistik -->
+    <div class="panel" id="panel-stats">
+      <div class="stats-summary">
+        <div class="stat-box"><div class="num" id="statTodayTotal">0 L</div><div class="lbl">Bugün</div></div>
+        <div class="stat-box"><div class="num" id="statWeekAvg">0 L</div><div class="lbl">7 Gün Ort.</div></div>
+        <div class="stat-box"><div class="num" id="statCowCount">0</div><div class="lbl">İnek Sayısı</div></div>
+      </div>
+      <div class="chart-wrap">
+        <h4>Çiftlik Toplam Üretimi (Son 14 Gün)</h4>
+        <canvas id="farmChart" height="160"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <h4>İneğe Göre Üretim (Son 14 Gün)</h4>
+        <select id="statsCowSelect" onchange="renderCowChart()" style="margin-bottom:10px;"></select>
+        <canvas id="cowChart" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- Satış -->
+    <div class="panel" id="panel-sales">
+      <div class="stats-summary">
+        <div class="stat-box"><div class="num" id="salesTodayProduced">0 L</div><div class="lbl">Bugün Üretilen</div></div>
+        <div class="stat-box"><div class="num" id="salesTodaySold">0 L</div><div class="lbl">Bugün Satılan</div></div>
+        <div class="stat-box"><div class="num" id="salesTodayRemaining">0 L</div><div class="lbl">Kalan / Depoda</div></div>
+      </div>
+
+      <div class="form-row">
+        <input type="date" id="saleDate">
+      </div>
+      <div class="form-row">
+        <input type="text" id="saleCompany" list="companyList" placeholder="Şirket adı (ör. Sütaş)">
+        <datalist id="companyList"></datalist>
+        <input type="number" id="saleLiters" min="0" step="0.1" placeholder="Litre" style="max-width: 90px;">
+      </div>
+      <button class="btn-primary" style="width:100%; margin-bottom:16px;" onclick="addSale()">+ Satış Ekle</button>
+
+      <div class="filter-row">
+        <select id="salesCompanyFilter" onchange="renderSalesList()">
+          <option value="all">Tüm Şirketler</option>
+        </select>
+      </div>
+      <div id="salesList"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <script>
+    /* ---------- Firebase ---------- */
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXEFr_xYyXjmJpbZdHqKf6bNJoW2eKA34",
+      authDomain: "ciftlik-takip-50768.firebaseapp.com",
+      projectId: "ciftlik-takip-50768",
+      storageBucket: "ciftlik-takip-50768.firebasestorage.app",
+      messagingSenderId: "1010842749724",
+      appId: "1:1010842749724:web:99be33c7dbe00a891e88d9"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const GESTATION_DAYS = 283;
+    const USER_KEY = "farmUserName";
+
+    /* ---------- Kullanıcı adı ekranı ---------- */
+    function saveUserName() {
+      const val = document.getElementById("nameInput").value.trim();
+      if (!val) { document.getElementById("nameInput").focus(); return; }
+      localStorage.setItem(USER_KEY, val);
+      showApp();
+    }
+    document.getElementById("nameInput").addEventListener("keypress", (e) => { if (e.key === "Enter") saveUserName(); });
+
+    function changeUserName() {
+      const current = localStorage.getItem(USER_KEY) || "";
+      const val = prompt("Adını değiştir:", current);
+      if (val && val.trim()) {
+        localStorage.setItem(USER_KEY, val.trim());
+        document.getElementById("userNameDisplay").textContent = val.trim();
+      }
+    }
+
+    function showApp() {
+      document.getElementById("nameScreen").style.display = "none";
+      document.getElementById("appScreen").style.display = "block";
+      document.getElementById("userNameDisplay").textContent = localStorage.getItem(USER_KEY) || "Bilinmiyor";
+      initApp();
+    }
+
+    /* ---------- Uygulama durumu ---------- */
+    let currentTab = "cows";
+    let cowsCache = [];
+    let milkCache = [];
+    let salesCache = [];
+    let appInitialized = false;
+    let openDetailId = null;
+    let farmChartInstance = null;
+    let cowChartInstance = null;
+
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function addDays(dateStr, days) {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + days);
+      return d.toISOString().slice(0, 10);
+    }
+    function daysBetween(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
+
+    function showToast(msg) {
+      let toast = document.getElementById("toastEl");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toastEl";
+        toast.className = "toast";
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      requestAnimationFrame(() => toast.classList.add("show"));
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str || "";
+      return div.innerHTML;
+    }
+
+    function cowLabel(cow) {
+      if (cow.tag && cow.name) return `${cow.tag} · ${cow.name}`;
+      if (cow.tag) return cow.tag;
+      return cow.name || "İsimsiz";
+    }
+
+    /* ---------- Tabs ---------- */
+    function updateIndicator(tab) {
+      const btn = document.getElementById(`tabBtn-${tab}`);
+      const indicator = document.getElementById("tabIndicator");
+      indicator.style.width = btn.offsetWidth + "px";
+      indicator.style.transform = `translateX(${btn.offsetLeft - 4}px)`;
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(`tabBtn-${tab}`).classList.add("active");
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.getElementById(`panel-${tab}`).classList.add("active");
+      updateIndicator(tab);
+      if (tab === "milk") renderMilkEntryList();
+      if (tab === "history") { populateCowFilter(); renderHistory(); }
+      if (tab === "stats") { populateStatsCowSelect(); renderStats(); }
+      if (tab === "sales") { populateCompanyFilter(); renderSalesTab(); }
+    }
+
+    /* ---------- Firestore dinleyicileri ---------- */
+    function initApp() {
+      if (appInitialized) return;
+      appInitialized = true;
+      document.getElementById("milkDate").value = todayStr();
+      document.getElementById("saleDate").value = todayStr();
+      updateIndicator("cows");
+
+      db.collection("cows").orderBy("createdAt", "asc").onSnapshot((snapshot) => {
+        cowsCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        setSyncStatus(true);
+        renderCowList();
+        if (currentTab === "milk") renderMilkEntryList();
+        if (currentTab === "history") populateCowFilter();
+        if (currentTab === "stats") { populateStatsCowSelect(); renderStats(); }
+      }, (err) => { console.error(err); setSyncStatus(false); });
+
+      db.collection("milkRecords").onSnapshot((snapshot) => {
+        milkCache = snapshot.docs.map(d => d.data());
+        if (currentTab === "milk") renderMilkEntryList();
+        if (currentTab === "history") renderHistory();
+        if (currentTab === "stats") renderStats();
+        if (currentTab === "sales") renderSalesTab();
+      }, (err) => { console.error(err); setSyncStatus(false); });
+
+      db.collection("milkSales").orderBy("date", "desc").onSnapshot((snapshot) => {
+        salesCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (currentTab === "sales") { populateCompanyFilter(); renderSalesTab(); }
+      }, (err) => { console.error(err); setSyncStatus(false); });
+    }
+
+    function setSyncStatus(connected) {
+      const dot = document.getElementById("syncDot");
+      const text = document.getElementById("syncText");
+      if (connected) { dot.classList.remove("offline"); text.textContent = "Bağlı — veriler ortak"; }
+      else { dot.classList.add("offline"); text.textContent = "Bağlantı sorunu"; }
+    }
+
+    /* ---------- Yardımcı: ineğin durumları ---------- */
+    function getWithdrawalInfo(cow) {
+      if (!cow.medication || !cow.medication.active) return null;
+      const remaining = cow.medication.withdrawalDays - daysBetween(cow.medication.startDate, todayStr());
+      if (remaining <= 0) return null;
+      return remaining;
+    }
+
+    function getPregnancyInfo(cow) {
+      if (!cow.breeding || !cow.breeding.pregnant) return null;
+      const remaining = daysBetween(todayStr(), cow.breeding.expectedCalvingDate);
+      return { expectedDate: cow.breeding.expectedCalvingDate, remaining };
+    }
+
+    function getVaccinationInfo(cow) {
+      if (!cow.nextVaccinationDate) return null;
+      const remaining = daysBetween(todayStr(), cow.nextVaccinationDate);
+      if (remaining > 7) return null;
+      return { date: cow.nextVaccinationDate, remaining, label: cow.nextVaccinationLabel || "Aşı" };
+    }
+
+    function getHeatInfo(cow) {
+      if (cow.breeding && cow.breeding.pregnant) return null;
+      const events = cow.heatEvents || [];
+      if (events.length === 0) return null;
+      const lastHeat = events.slice().sort((a, b) => b.date.localeCompare(a.date))[0].date;
+      const nextExpected = addDays(lastHeat, 21);
+      const remaining = daysBetween(todayStr(), nextExpected);
+      return { lastHeat, nextExpected, remaining };
+    }
+
+    function getPregnancyCheckInfo(cow) {
+      if (cow.breeding && cow.breeding.pregnant) return null;
+      const attempts = (cow.breedingAttempts || []).filter(a => a.result === "pending");
+      if (attempts.length === 0) return null;
+      const latest = attempts.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
+      const since = daysBetween(latest.date, todayStr());
+      if (since < 18) return null;
+      return { attemptDate: latest.date, since };
+    }
+
+    /* ---------- İnekler ---------- */
+    function renderCowList() {
+      renderUpcomingPanel();
+      const list = document.getElementById("cowList");
+      list.innerHTML = "";
+      if (cowsCache.length === 0) {
+        list.innerHTML = '<div class="empty-msg">Henüz inek eklenmedi. Yukarıdan ekleyebilirsin.</div>';
+        return;
+      }
+      cowsCache.forEach(cow => {
+        const card = document.createElement("div");
+        card.className = "cow-card";
+
+        const status = cow.healthStatus || "healthy";
+        const statusLabel = { healthy: "Sağlıklı", sick: "Hasta", treatment: "Tedavide" }[status];
+        const statusClass = { healthy: "badge-healthy", sick: "badge-sick", treatment: "badge-treatment" }[status];
+
+        const withdrawal = getWithdrawalInfo(cow);
+        const pregnancy = getPregnancyInfo(cow);
+        const vaccine = getVaccinationInfo(cow);
+
+        let badgesHtml = `<span class="badge ${statusClass}">${statusLabel}</span>`;
+        if (withdrawal) badgesHtml += `<span class="badge badge-withdrawal">⚠️ İlaçlı (${withdrawal}g)</span>`;
+        if (pregnancy) badgesHtml += `<span class="badge badge-pregnant">🤰 Gebe</span>`;
+        if (vaccine) {
+          const vClass = vaccine.remaining < 0 ? "badge-vaccine-overdue" : "badge-vaccine-due";
+          const vText = vaccine.remaining < 0 ? `💉 Aşı gecikti (${Math.abs(vaccine.remaining)}g)` : `💉 Aşı yaklaşıyor (${vaccine.remaining}g)`;
+          badgesHtml += `<span class="badge ${vClass}">${vText}</span>`;
+        }
+        const heat = getHeatInfo(cow);
+        if (heat && Math.abs(heat.remaining) <= 3) {
+          const hText = heat.remaining < 0 ? `💗 Kızgınlık gecikti (${Math.abs(heat.remaining)}g)` : (heat.remaining === 0 ? "💗 Kızgınlık bugün beklenir" : `💗 Kızgınlık yakın (${heat.remaining}g)`);
+          badgesHtml += `<span class="badge badge-heat">${hText}</span>`;
+        }
+        const check = getPregnancyCheckInfo(cow);
+        if (check) badgesHtml += `<span class="badge badge-check">🔍 Gebelik kontrolü zamanı</span>`;
+
+        card.innerHTML = `
+          <div class="cow-card-top" data-toggle="${cow.id}">
+            <div class="cow-info">
+              <div class="cow-avatar">🐄</div>
+              <div>
+                <div class="cow-name">${escapeHtml(cow.tag || "Küpe no yok")}</div>
+                <div class="cow-tag">${cow.name ? escapeHtml(cow.name) : "Takma ad yok"}</div>
+                <div class="cow-badges">${badgesHtml}</div>
+              </div>
+            </div>
+            <div class="cow-actions">
+              <button class="expand-btn ${openDetailId === cow.id ? 'open' : ''}">▾</button>
+              <button class="del-cow-btn" title="İneği sil">🗑️</button>
+            </div>
+          </div>
+          <div class="cow-detail" id="detail-${cow.id}"></div>
+        `;
+
+        card.querySelector(".cow-card-top").addEventListener("click", (e) => {
+          if (e.target.closest(".del-cow-btn")) return;
+          toggleDetail(cow.id);
+        });
+        card.querySelector(".del-cow-btn").onclick = (e) => { e.stopPropagation(); deleteCow(cow.id); };
+
+        list.appendChild(card);
+
+        if (openDetailId === cow.id) {
+          renderCowDetail(cow);
+        }
+      });
+    }
+
+    function renderUpcomingPanel() {
+      const container = document.getElementById("upcomingPanel");
+      if (!container) return;
+
+      const items = [];
+      cowsCache.forEach(cow => {
+        const preg = getPregnancyInfo(cow);
+        if (preg && preg.remaining <= 14) {
+          items.push({
+            type: "calving", cow, remaining: preg.remaining, date: preg.expectedDate,
+            text: `${cowLabel(cow)} — tahmini doğum`
+          });
+        }
+        const vac = getVaccinationInfo(cow);
+        if (vac) {
+          items.push({
+            type: "vaccine", cow, remaining: vac.remaining, date: vac.date,
+            text: `${cowLabel(cow)} — ${escapeHtml(vac.label)}`
+          });
+        }
+        const heat = getHeatInfo(cow);
+        if (heat && Math.abs(heat.remaining) <= 3) {
+          items.push({
+            type: "heat", cow, remaining: heat.remaining, date: heat.nextExpected,
+            text: `${cowLabel(cow)} — beklenen kızgınlık`
+          });
+        }
+        const check = getPregnancyCheckInfo(cow);
+        if (check) {
+          items.push({
+            type: "check", cow, remaining: -check.since, date: todayStr(),
+            text: `${cowLabel(cow)} — gebelik kontrolü (${check.since} gün önce tohumlandı)`
+          });
+        }
+      });
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="upcoming-panel all-clear">
+            <div class="upcoming-header">✅ Yaklaşan İşler</div>
+            <div class="empty-clear">Şu an dikkat gerektiren bir şey yok.</div>
+          </div>`;
+        return;
+      }
+
+      items.sort((a, b) => a.remaining - b.remaining);
+
+      const rows = items.map(item => {
+        const urgency = item.remaining < 0 ? "urgent" : (item.remaining <= 2 ? "urgent" : "soon");
+        const icon = { calving: "🍼", vaccine: "💉", heat: "💗", check: "🔍" }[item.type];
+        const daysText = item.remaining < 0 ? `${Math.abs(item.remaining)} gün gecikti` : (item.remaining === 0 ? "Bugün" : `${item.remaining} gün kaldı`);
+        return `
+          <div class="upcoming-item ${urgency}">
+            <div class="u-bar"></div>
+            <div class="u-icon">${icon}</div>
+            <div class="u-text">${item.text}</div>
+            <div class="u-days">${daysText}</div>
+          </div>`;
+      }).join("");
+
+      container.innerHTML = `
+        <div class="upcoming-panel">
+          <div class="upcoming-header">📋 Yaklaşan İşler (${items.length})</div>
+          ${rows}
+        </div>`;
+    }
+
+    function toggleDetail(id) {
+      openDetailId = (openDetailId === id) ? null : id;
+      renderCowList();
+    }
+
+    function renderCowDetail(cow) {
+      const el = document.getElementById(`detail-${cow.id}`);
+      if (!el) return;
+      el.classList.add("open");
+
+      const withdrawal = getWithdrawalInfo(cow);
+      const pregnancy = getPregnancyInfo(cow);
+      const heat = getHeatInfo(cow);
+      const check = getPregnancyCheckInfo(cow);
+      const events = (cow.healthEvents || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+
+      el.innerHTML = `
+        <div class="detail-section">
+          <h4>Sağlık Durumu</h4>
+          <div class="detail-row">
+            <select id="healthStatus-${cow.id}">
+              <option value="healthy" ${cow.healthStatus === "healthy" || !cow.healthStatus ? "selected" : ""}>Sağlıklı</option>
+              <option value="sick" ${cow.healthStatus === "sick" ? "selected" : ""}>Hasta</option>
+              <option value="treatment" ${cow.healthStatus === "treatment" ? "selected" : ""}>Tedavide</option>
+            </select>
+            <button class="btn-secondary btn-small" id="saveStatus-${cow.id}">Kaydet</button>
+          </div>
+          <div class="detail-row">
+            <input type="text" id="eventNote-${cow.id}" placeholder="Not (ör. Şap aşısı yapıldı)">
+            <button class="btn-secondary btn-small" id="addEvent-${cow.id}">Ekle</button>
+          </div>
+          <div class="detail-row" style="align-items:center;">
+            <label style="font-size:11.5px; display:flex; align-items:center; gap:5px; color: var(--slate);">
+              <input type="checkbox" id="isVaccine-${cow.id}" style="width:auto;" onchange="document.getElementById('vaccineDateWrap-${cow.id}').style.display = this.checked ? 'flex' : 'none';">
+              💉 Bu bir aşı kaydı
+            </label>
+          </div>
+          <div class="detail-row" id="vaccineDateWrap-${cow.id}" style="display:none;">
+            <input type="date" id="nextVaccineDate-${cow.id}" placeholder="Sonraki aşı tarihi">
+          </div>
+          ${cow.nextVaccinationDate ? `<div class="detail-row"><button class="btn-secondary btn-small" id="clearVaccine-${cow.id}">💉 Aşı Hatırlatıcısını Temizle (${cow.nextVaccinationDate})</button></div>` : ""}
+          <div id="eventsList-${cow.id}">
+            ${events.length === 0 ? '<div class="empty-msg" style="padding:8px;">Kayıt yok</div>' :
+              events.map(ev => `<div class="health-log-item"><span class="h-date">${ev.date}</span> — ${escapeHtml(ev.note)}</div>`).join("")}
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>İlaç / Bekleme Süresi</h4>
+          ${withdrawal ? `<div class="warning-banner">⚠️ Süt satılamaz — ${withdrawal} gün kaldı</div>` : ""}
+          <div class="detail-row">
+            <input type="date" id="medStart-${cow.id}" value="${cow.medication ? cow.medication.startDate : todayStr()}">
+            <input type="number" id="medDays-${cow.id}" min="1" placeholder="Gün" style="max-width:70px;" value="${cow.medication ? cow.medication.withdrawalDays : ""}">
+            <button class="btn-secondary btn-small" id="saveMed-${cow.id}">Başlat</button>
+          </div>
+          ${cow.medication ? `<button class="btn-secondary btn-small" id="clearMed-${cow.id}">İlaç Kaydını Temizle</button>` : ""}
+        </div>
+
+        <div class="detail-section">
+          <h4>Kızgınlık (Östrüs) Takibi</h4>
+          ${heat ? `<div class="next-heat-info">💗 Sonraki kızgınlık beklenen: ${heat.nextExpected} (${heat.remaining < 0 ? Math.abs(heat.remaining) + " gün gecikti" : heat.remaining + " gün kaldı"})</div>` : ""}
+          <div>${(cow.heatEvents || []).slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6).map(h => `<span class="heat-date-chip">${h.date}</span>`).join("") || '<span class="empty-msg" style="padding:2px;">Henüz kayıt yok</span>'}</div>
+          <div class="detail-row" style="margin-top:8px;">
+            <input type="date" id="heatDate-${cow.id}" value="${todayStr()}">
+            <button class="btn-secondary btn-small" id="addHeat-${cow.id}">Kızgınlık Kaydet</button>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Tohumlama Geçmişi</h4>
+          ${pregnancy ? `<div class="pregnant-banner">🤰 Tahmini doğum: ${pregnancy.expectedDate} (${pregnancy.remaining} gün kaldı)</div>` : ""}
+          ${check ? `<div class="warning-banner">🔍 ${check.since} gün önce tohumlandı, gebelik kontrolü zamanı gelmiş olabilir</div>` : ""}
+          <div id="attemptsList-${cow.id}">
+            ${(cow.breedingAttempts || []).slice().sort((a, b) => b.date.localeCompare(a.date)).map((att, i) => `
+              <div class="attempt-item">
+                <span class="a-date">${att.date}</span>
+                <select data-idx="${(cow.breedingAttempts || []).indexOf(att)}" class="attempt-result-${cow.id}">
+                  <option value="pending" ${att.result === "pending" ? "selected" : ""}>Bekliyor</option>
+                  <option value="confirmed" ${att.result === "confirmed" ? "selected" : ""}>Gebelik Onaylandı</option>
+                  <option value="failed" ${att.result === "failed" ? "selected" : ""}>Tutmadı</option>
+                </select>
+              </div>
+            `).join("") || '<div class="empty-msg" style="padding:4px;">Henüz tohumlama kaydı yok</div>'}
+          </div>
+          <div class="detail-row" style="margin-top:8px;">
+            <input type="date" id="breedDate-${cow.id}" value="${todayStr()}">
+            <button class="btn-secondary btn-small" id="saveBreed-${cow.id}">+ Tohumlama Ekle</button>
+          </div>
+          ${cow.breeding && cow.breeding.pregnant ? `<button class="btn-secondary btn-small" id="clearBreed-${cow.id}" style="margin-top:8px;">Doğdu / Gebelik Bitti</button>` : ""}
+        </div>
+      `;
+
+      document.getElementById(`saveStatus-${cow.id}`).onclick = () => {
+        const val = document.getElementById(`healthStatus-${cow.id}`).value;
+        db.collection("cows").doc(cow.id).update({ healthStatus: val }).then(() => showToast("Sağlık durumu güncellendi"));
+      };
+
+      document.getElementById(`addEvent-${cow.id}`).onclick = () => {
+        const noteInput = document.getElementById(`eventNote-${cow.id}`);
+        const note = noteInput.value.trim();
+        if (!note) return;
+        const isVaccine = document.getElementById(`isVaccine-${cow.id}`).checked;
+        const nextDate = document.getElementById(`nextVaccineDate-${cow.id}`).value;
+        const userName = localStorage.getItem(USER_KEY) || "Bilinmiyor";
+        const label = isVaccine ? `💉 ${note}` : note;
+        const newEvent = { date: todayStr(), note: `${label} (${userName})` };
+        const events = cow.healthEvents || [];
+        const updateData = { healthEvents: [...events, newEvent] };
+        if (isVaccine && nextDate) {
+          updateData.nextVaccinationDate = nextDate;
+          updateData.nextVaccinationLabel = note;
+        }
+        db.collection("cows").doc(cow.id).update(updateData).then(() => {
+          noteInput.value = "";
+          showToast(isVaccine && nextDate ? "Aşı kaydı ve hatırlatıcı eklendi" : "Sağlık kaydı eklendi");
+        });
+      };
+
+      const clearVaccineBtn = document.getElementById(`clearVaccine-${cow.id}`);
+      if (clearVaccineBtn) clearVaccineBtn.onclick = () => {
+        db.collection("cows").doc(cow.id).update({
+          nextVaccinationDate: firebase.firestore.FieldValue.delete(),
+          nextVaccinationLabel: firebase.firestore.FieldValue.delete()
+        }).then(() => showToast("Aşı hatırlatıcısı temizlendi"));
+      };
+
+      document.getElementById(`saveMed-${cow.id}`).onclick = () => {
+        const startDate = document.getElementById(`medStart-${cow.id}`).value || todayStr();
+        const days = parseInt(document.getElementById(`medDays-${cow.id}`).value);
+        if (!days || days <= 0) { showToast("Gün sayısı girmelisin"); return; }
+        db.collection("cows").doc(cow.id).update({
+          medication: { active: true, startDate, withdrawalDays: days }
+        }).then(() => showToast("İlaç kaydı başlatıldı"));
+      };
+
+      const clearMedBtn = document.getElementById(`clearMed-${cow.id}`);
+      if (clearMedBtn) clearMedBtn.onclick = () => {
+        db.collection("cows").doc(cow.id).update({ medication: firebase.firestore.FieldValue.delete() })
+          .then(() => showToast("İlaç kaydı temizlendi"));
+      };
+
+      document.getElementById(`addHeat-${cow.id}`).onclick = () => {
+        const date = document.getElementById(`heatDate-${cow.id}`).value || todayStr();
+        const heatEvents = cow.heatEvents || [];
+        db.collection("cows").doc(cow.id).update({ heatEvents: [...heatEvents, { date }] })
+          .then(() => showToast("Kızgınlık kaydedildi"));
+      };
+
+      function recomputeBreeding(attempts) {
+        const confirmed = attempts.filter(a => a.result === "confirmed").sort((a, b) => b.date.localeCompare(a.date));
+        if (confirmed.length > 0) {
+          const latest = confirmed[0];
+          return { inseminationDate: latest.date, expectedCalvingDate: addDays(latest.date, GESTATION_DAYS), pregnant: true };
+        }
+        return null;
+      }
+
+      document.getElementById(`saveBreed-${cow.id}`).onclick = () => {
+        const date = document.getElementById(`breedDate-${cow.id}`).value;
+        if (!date) { showToast("Tarih girmelisin"); return; }
+        const attempts = [...(cow.breedingAttempts || []), { date, result: "pending" }];
+        db.collection("cows").doc(cow.id).update({ breedingAttempts: attempts })
+          .then(() => showToast("Tohumlama denemesi eklendi"));
+      };
+
+      document.querySelectorAll(`.attempt-result-${cow.id}`).forEach(sel => {
+        sel.onchange = () => {
+          const idx = parseInt(sel.getAttribute("data-idx"));
+          const attempts = [...(cow.breedingAttempts || [])];
+          attempts[idx] = { ...attempts[idx], result: sel.value };
+          const newBreeding = recomputeBreeding(attempts);
+          const updateData = { breedingAttempts: attempts };
+          updateData.breeding = newBreeding || firebase.firestore.FieldValue.delete();
+          db.collection("cows").doc(cow.id).update(updateData).then(() => showToast("Tohumlama sonucu güncellendi"));
+        };
+      });
+
+      const clearBreedBtn = document.getElementById(`clearBreed-${cow.id}`);
+      if (clearBreedBtn) clearBreedBtn.onclick = () => {
+        db.collection("cows").doc(cow.id).update({ breeding: firebase.firestore.FieldValue.delete() })
+          .then(() => showToast("Gebelik kaydı temizlendi"));
+      };
+    }
+
+    function addCow() {
+      const nameInput = document.getElementById("cowNameInput");
+      const tagInput = document.getElementById("cowTagInput");
+      const name = nameInput.value.trim();
+      const tag = tagInput.value.trim();
+      if (!tag) { showToast("Küpe no gerekli"); tagInput.focus(); return; }
+
+      db.collection("cows").add({
+        name, tag, healthStatus: "healthy", healthEvents: [], heatEvents: [], breedingAttempts: [],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        nameInput.value = ""; tagInput.value = ""; tagInput.focus();
+        showToast(`✅ ${cowLabel({ name, tag })} eklendi`);
+      }).catch(err => { console.error(err); showToast("Eklenirken hata oluştu"); });
+    }
+
+    function deleteCow(id) {
+      if (!confirm("Bu ineği ve tüm süt kayıtlarını silmek istediğine emin misin?")) return;
+      db.collection("cows").doc(id).delete().then(() => {
+        return db.collection("milkRecords").where("cowId", "==", id).get();
+      }).then(snapshot => {
+        const batch = db.batch();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+        return batch.commit();
+      }).then(() => showToast("İnek silindi"))
+        .catch(err => { console.error(err); showToast("Silinirken hata oluştu"); });
+    }
+
+    /* ---------- Süt girişi ---------- */
+    function renderMilkEntryList() {
+      const dateInput = document.getElementById("milkDate");
+      const date = dateInput.value || todayStr();
+      dateInput.value = date;
+
+      const list = document.getElementById("milkEntryList");
+      list.innerHTML = "";
+
+      if (cowsCache.length === 0) {
+        list.innerHTML = '<div class="empty-msg">Önce "İnekler" sekmesinden inek eklemelisin.</div>';
+        document.getElementById("daySummary").style.display = "none";
+        return;
+      }
+
+      cowsCache.forEach(cow => {
+        const existing = milkCache.find(r => r.cowId === cow.id && r.date === date);
+        const withdrawal = getWithdrawalInfo(cow);
+        const row = document.createElement("div");
+        row.className = "milk-row";
+        row.innerHTML = `
+          <div class="milk-row-top">
+            <div class="milk-name">${escapeHtml(cowLabel(cow))}</div>
+            <div class="milk-input-group">
+              <div class="milk-input-wrap">
+                <label>Sabah</label>
+                <input type="number" min="0" step="0.1" class="morning-input" data-cow="${cow.id}" value="${existing ? existing.morning : ""}" placeholder="0">
+              </div>
+              <div class="milk-input-wrap">
+                <label>Akşam</label>
+                <input type="number" min="0" step="0.1" class="evening-input" data-cow="${cow.id}" value="${existing ? existing.evening : ""}" placeholder="0">
+              </div>
+            </div>
+          </div>
+          ${withdrawal ? `<div class="warning-banner">⚠️ Bu ineğin sütü satılamaz — ${withdrawal} gün kaldı</div>` : ""}
+        `;
+        list.appendChild(row);
+      });
+
+      list.querySelectorAll("input").forEach(inp => inp.addEventListener("input", updateDaySummary));
+      updateDaySummary();
+    }
+
+    function updateDaySummary() {
+      const morningInputs = document.querySelectorAll(".morning-input");
+      const eveningInputs = document.querySelectorAll(".evening-input");
+      let total = 0;
+      morningInputs.forEach(i => total += parseFloat(i.value) || 0);
+      eveningInputs.forEach(i => total += parseFloat(i.value) || 0);
+      const summary = document.getElementById("daySummary");
+      if (cowsCache.length > 0) {
+        summary.style.display = "flex";
+        document.getElementById("daySummaryValue").textContent = total.toFixed(1) + " L";
+      } else summary.style.display = "none";
+    }
+
+    function saveMilkEntries() {
+      const date = document.getElementById("milkDate").value || todayStr();
+      if (cowsCache.length === 0) { showToast("Önce inek ekle"); return; }
+      const userName = localStorage.getItem(USER_KEY) || "Bilinmiyor";
+
+      const batch = db.batch();
+      cowsCache.forEach(cow => {
+        const morningInput = document.querySelector(`.morning-input[data-cow="${cow.id}"]`);
+        const eveningInput = document.querySelector(`.evening-input[data-cow="${cow.id}"]`);
+        const morning = parseFloat(morningInput.value) || 0;
+        const evening = parseFloat(eveningInput.value) || 0;
+        const docId = `${cow.id}_${date}`;
+        const ref = db.collection("milkRecords").doc(docId);
+        batch.set(ref, { cowId: cow.id, date, morning, evening, enteredBy: userName });
+      });
+
+      batch.commit().then(() => showToast("💾 Kayıt kaydedildi"))
+        .catch(err => { console.error(err); showToast("Kaydedilirken hata oluştu"); });
+    }
+
+    /* ---------- Geçmiş ---------- */
+    function populateCowFilter() {
+      const select = document.getElementById("historyCowFilter");
+      const currentVal = select.value;
+      select.innerHTML = '<option value="all">Tüm İnekler</option>';
+      cowsCache.forEach(cow => {
+        const opt = document.createElement("option");
+        opt.value = cow.id; opt.textContent = cowLabel(cow);
+        select.appendChild(opt);
+      });
+      if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
+    }
+
+    function renderHistory() {
+      const filterId = document.getElementById("historyCowFilter").value;
+      const cowMap = {};
+      cowsCache.forEach(c => cowMap[c.id] = cowLabel(c));
+
+      let records = milkCache.slice().sort((a, b) => b.date.localeCompare(a.date));
+      if (filterId !== "all") records = records.filter(r => r.cowId === filterId);
+
+      const list = document.getElementById("historyList");
+      list.innerHTML = "";
+
+      if (records.length === 0) { list.innerHTML = '<div class="empty-msg">Henüz kayıt yok.</div>'; return; }
+
+      records.forEach(r => {
+        const total = (r.morning || 0) + (r.evening || 0);
+        const item = document.createElement("div");
+        item.className = "history-item";
+        item.innerHTML = `
+          <div>
+            <div class="history-date">${r.date}</div>
+            <div class="history-cow">${escapeHtml(cowMap[r.cowId] || "Silinmiş inek")} · Sabah: ${r.morning || 0}L, Akşam: ${r.evening || 0}L</div>
+            <div class="history-cow">👤 ${escapeHtml(r.enteredBy || "Bilinmiyor")}</div>
+          </div>
+          <div class="history-total">${total.toFixed(1)} L</div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    /* ---------- İstatistik ---------- */
+    function last14Dates() {
+      const arr = [];
+      for (let i = 13; i >= 0; i--) arr.push(addDays(todayStr(), -i));
+      return arr;
+    }
+
+    function populateStatsCowSelect() {
+      const select = document.getElementById("statsCowSelect");
+      const currentVal = select.value;
+      select.innerHTML = "";
+      cowsCache.forEach(cow => {
+        const opt = document.createElement("option");
+        opt.value = cow.id; opt.textContent = cowLabel(cow);
+        select.appendChild(opt);
+      });
+      if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
+    }
+
+    function renderStats() {
+      const dates = last14Dates();
+      const today = todayStr();
+
+      // Özet kutular
+      const todayTotal = milkCache.filter(r => r.date === today).reduce((sum, r) => sum + (r.morning || 0) + (r.evening || 0), 0);
+      document.getElementById("statTodayTotal").textContent = todayTotal.toFixed(1) + " L";
+
+      const last7 = dates.slice(7);
+      const weekTotal = milkCache.filter(r => last7.includes(r.date)).reduce((sum, r) => sum + (r.morning || 0) + (r.evening || 0), 0);
+      document.getElementById("statWeekAvg").textContent = (weekTotal / 7).toFixed(1) + " L";
+      document.getElementById("statCowCount").textContent = cowsCache.length;
+
+      // Çiftlik toplam grafiği
+      const farmData = dates.map(d => milkCache.filter(r => r.date === d).reduce((sum, r) => sum + (r.morning || 0) + (r.evening || 0), 0));
+      const farmCtx = document.getElementById("farmChart");
+      if (farmChartInstance) farmChartInstance.destroy();
+      farmChartInstance = new Chart(farmCtx, {
+        type: "line",
+        data: {
+          labels: dates.map(d => d.slice(5)),
+          datasets: [{ label: "Litre", data: farmData, borderColor: "#4C9A4A", backgroundColor: "rgba(76,154,74,0.12)", fill: true, tension: 0.3 }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      renderCowChart();
+    }
+
+    function renderCowChart() {
+      const cowId = document.getElementById("statsCowSelect").value;
+      if (!cowId) return;
+      const dates = last14Dates();
+      const cowData = dates.map(d => {
+        const rec = milkCache.find(r => r.cowId === cowId && r.date === d);
+        return rec ? (rec.morning || 0) + (rec.evening || 0) : 0;
+      });
+      const ctx = document.getElementById("cowChart");
+      if (cowChartInstance) cowChartInstance.destroy();
+      cowChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: dates.map(d => d.slice(5)),
+          datasets: [{ label: "Litre", data: cowData, backgroundColor: "#E8A33D" }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    /* ---------- Satış ---------- */
+    function populateCompanyFilter() {
+      const select = document.getElementById("salesCompanyFilter");
+      const currentVal = select.value;
+      const companies = [...new Set(salesCache.map(s => s.company))].sort();
+      select.innerHTML = '<option value="all">Tüm Şirketler</option>';
+      companies.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c; opt.textContent = c;
+        select.appendChild(opt);
+      });
+      if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
+
+      const datalist = document.getElementById("companyList");
+      datalist.innerHTML = companies.map(c => `<option value="${escapeHtml(c)}">`).join("");
+    }
+
+    function addSale() {
+      const date = document.getElementById("saleDate").value || todayStr();
+      const company = document.getElementById("saleCompany").value.trim();
+      const liters = parseFloat(document.getElementById("saleLiters").value);
+      const userName = localStorage.getItem(USER_KEY) || "Bilinmiyor";
+
+      if (!company) { showToast("Şirket adı gerekli"); return; }
+      if (!liters || liters <= 0) { showToast("Litre girmelisin"); return; }
+
+      db.collection("milkSales").add({ date, company, liters, enteredBy: userName }).then(() => {
+        document.getElementById("saleCompany").value = "";
+        document.getElementById("saleLiters").value = "";
+        showToast("💾 Satış kaydedildi");
+      }).catch(err => { console.error(err); showToast("Kaydedilirken hata oluştu"); });
+    }
+
+    function deleteSale(id) {
+      if (!confirm("Bu satış kaydını silmek istediğine emin misin?")) return;
+      db.collection("milkSales").doc(id).delete().then(() => showToast("Satış kaydı silindi"));
+    }
+
+    function renderSalesTab() {
+      const today = todayStr();
+      const producedToday = milkCache.filter(r => r.date === today).reduce((sum, r) => sum + (r.morning || 0) + (r.evening || 0), 0);
+      const soldToday = salesCache.filter(s => s.date === today).reduce((sum, s) => sum + (s.liters || 0), 0);
+      document.getElementById("salesTodayProduced").textContent = producedToday.toFixed(1) + " L";
+      document.getElementById("salesTodaySold").textContent = soldToday.toFixed(1) + " L";
+      document.getElementById("salesTodayRemaining").textContent = (producedToday - soldToday).toFixed(1) + " L";
+
+      renderSalesList();
+    }
+
+    function renderSalesList() {
+      const filterCompany = document.getElementById("salesCompanyFilter").value;
+      let sales = salesCache.slice();
+      if (filterCompany !== "all") sales = sales.filter(s => s.company === filterCompany);
+
+      const list = document.getElementById("salesList");
+      list.innerHTML = "";
+
+      if (sales.length === 0) { list.innerHTML = '<div class="empty-msg">Henüz satış kaydı yok.</div>'; return; }
+
+      sales.forEach(s => {
+        const item = document.createElement("div");
+        item.className = "history-item";
+        item.innerHTML = `
+          <div>
+            <div class="history-date">${s.date} — ${escapeHtml(s.company)}</div>
+            <div class="history-cow">👤 ${escapeHtml(s.enteredBy || "Bilinmiyor")}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="history-total">${(s.liters || 0).toFixed(1)} L</div>
+            <button class="del-cow-btn" title="Sil">🗑️</button>
+          </div>
+        `;
+        item.querySelector(".del-cow-btn").onclick = () => deleteSale(s.id);
+        list.appendChild(item);
+      });
+    }
+
+    document.getElementById("cowTagInput") && document.getElementById("cowTagInput").addEventListener("keypress", (e) => { if (e.key === "Enter") addCow(); });
+    window.addEventListener("resize", () => { if (appInitialized) updateIndicator(currentTab); });
+
+    window.addEventListener("load", () => {
+      if (localStorage.getItem(USER_KEY)) showApp();
+    });
+  </script>
+
+</body>
+</html>
